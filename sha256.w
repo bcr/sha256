@@ -423,11 +423,15 @@ symbol |UNIT_TEST| is |#define|d.
 @c
 #ifdef UNIT_TEST
 
+#include <stdio.h> /* Just for |printf| */
+
 @<Unit tests@>@;
 
 int main(int argc, char** argv)
 {
     @<Run unit tests@>@;
+
+    return 0;
 }
 
 #endif
@@ -462,7 +466,7 @@ void test_B1()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 3, "abc");
+    sha_256_update(&context, 3, (byte*) "abc");
     sha_256_final(&context);
     
     assert_byte_arrays_equal("test_B1", expected_value, sizeof(expected_value),
@@ -486,7 +490,7 @@ void test_B2()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 56, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    sha_256_update(&context, 56, (byte*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     sha_256_final(&context);
     
     assert_byte_arrays_equal("test_B2", expected_value, sizeof(expected_value),

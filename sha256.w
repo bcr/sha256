@@ -436,8 +436,12 @@ int main(int argc, char** argv)
 
 #endif
 
-@ I'm going to define a function that makes it easy to check to see if a
-particular digest result matches.
+@ Each unit test will use this macro to print its output. It uses the function
+name for the output test name.
+
+@d assert_final_digest_equal() assert_byte_arrays_equal(__func__, expected_value, sizeof(expected_value), context.final_digest, sizeof(context.final_digest))
+
+@ Helper test function for making sure two byte arrays are equal.
 
 @<Unit tests@>=
 void assert_byte_arrays_equal(
@@ -469,8 +473,7 @@ void test_B1()
     sha_256_update(&context, 3, (byte*) "abc");
     sha_256_final(&context);
     
-    assert_byte_arrays_equal("test_B1", expected_value, sizeof(expected_value),
-    context.final_digest, sizeof(context.final_digest));
+    assert_final_digest_equal();
 }
 
 @ @<Run unit tests@>=
@@ -493,8 +496,7 @@ void test_B2()
     sha_256_update(&context, 56, (byte*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     sha_256_final(&context);
     
-    assert_byte_arrays_equal("test_B2", expected_value, sizeof(expected_value),
-    context.final_digest, sizeof(context.final_digest));
+    assert_final_digest_equal();
 }
 
 @ @<Run unit tests@>=
@@ -525,8 +527,7 @@ void test_B3()
     }
     sha_256_final(&context);
     
-    assert_byte_arrays_equal("test_B3", expected_value, sizeof(expected_value),
-    context.final_digest, sizeof(context.final_digest));
+    assert_final_digest_equal();
 }
 
 @ @<Run unit tests@>=

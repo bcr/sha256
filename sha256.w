@@ -59,7 +59,7 @@ void sha_256_init(sha_256_context* context)
     @<Initialize the current message block...@>@;
 }
 
-void sha_256_update(sha_256_context* context, uint32 data_length, byte* data)
+void sha_256_update(sha_256_context* context, uint32 data_length, const byte* data)
 {
     while (data_length > 0)
     {
@@ -445,10 +445,10 @@ name for the output test name.
 
 @<Unit tests@>=
 void assert_byte_arrays_equal(
-    char* test_name,
-    byte* expected_value,
+    const char* test_name,
+    const byte* expected_value,
     int expected_value_length,
-    byte* actual_value,
+    const byte* actual_value,
     int actual_value_length)
 {
     printf("%s %s\n", ((expected_value_length != actual_value_length) ||
@@ -461,7 +461,7 @@ void assert_byte_arrays_equal(
 @<Unit tests@>=
 void test_B1()
 {
-    static byte expected_value[] = {
+    const byte expected_value[] = {
         0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,
         0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,
         0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
@@ -470,7 +470,7 @@ void test_B1()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 3, (byte*) "abc");
+    sha_256_update(&context, 3, (const byte*) "abc");
     sha_256_final(&context);
     
     assert_final_digest_equal();
@@ -484,7 +484,7 @@ test_B1();
 @<Unit tests@>=
 void test_B2()
 {
-    static byte expected_value[] = {
+    const byte expected_value[] = {
         0x24, 0x8d, 0x6a, 0x61, 0xd2, 0x06, 0x38, 0xb8,
         0xe5, 0xc0, 0x26, 0x93, 0x0c, 0x3e, 0x60, 0x39,
         0xa3, 0x3c, 0xe4, 0x59, 0x64, 0xff, 0x21, 0x67,
@@ -493,7 +493,7 @@ void test_B2()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 56, (byte*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    sha_256_update(&context, 56, (const byte*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     sha_256_final(&context);
     
     assert_final_digest_equal();
@@ -508,7 +508,7 @@ test_B2();
 @<Unit tests@>=
 void test_B3()
 {
-    static byte expected_value[] = {
+    const byte expected_value[] = {
         0xcd, 0xc7, 0x6e, 0x5c, 0x99, 0x14, 0xfb, 0x92,
         0x81, 0xa1, 0xc7, 0xe2, 0x84, 0xd7, 0x3e, 0x67,
         0xf1, 0x80, 0x9a, 0x48, 0xa4, 0x97, 0x20, 0x0e,

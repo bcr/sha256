@@ -41,6 +41,10 @@ the shell your taco salad comes in --- it's a bowl as well as a snack.
 \smallskip\rightline{--- Blake Ramsdell, July 2002}
 \rightline{\pdfURL{Brute Squad Labs, Inc.}{http://www.brutesquadlabs.com}}
 
+@s sha_256_context int
+@s byte int
+@s uint32 int
+
 @ In order to digest data with SHA-256, you simply call |sha_256_init| followed
 by one or more calls to |sha_256_update| and then ultimately call
 |sha_256_final|. The resulting digest is stored in the byte array member

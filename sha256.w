@@ -42,8 +42,8 @@ the shell your taco salad comes in --- it's a bowl as well as a snack.
 \rightline{\pdfURL{Brute Squad Labs, Inc.}{http://www.brutesquadlabs.com}}
 
 @s sha_256_context int
-@s byte int
-@s uint32 int
+@s uint8_t int
+@s uint32_t int
 
 @ In order to digest data with SHA-256, you simply call |sha_256_init| followed
 by one or more calls to |sha_256_update| and then ultimately call
@@ -52,6 +52,7 @@ by one or more calls to |sha_256_update| and then ultimately call
 
 @c
 #include <memory.h>
+#include <stdint.h>
 
 @<Type definitions@>@;
 @<Global constants@>@;
@@ -63,11 +64,11 @@ void sha_256_init(sha_256_context* context)
     @<Initialize the current message block...@>@;
 }
 
-void sha_256_update(sha_256_context* context, uint32 data_length, const byte* data)
+void sha_256_update(sha_256_context* context, uint32_t data_length, const uint8_t* data)
 {
     while (data_length > 0)
     {
-        uint32 bytes_to_copy = min(remaining_bytes_in_block, data_length);
+        uint32_t bytes_to_copy = min(remaining_bytes_in_block, data_length);
     
         @<Append data to...@>@;
         @<Update hash...@>@;
@@ -79,8 +80,8 @@ void sha_256_update(sha_256_context* context, uint32 data_length, const byte* da
 
 void sha_256_final(sha_256_context* context)
 {
-    uint32 total_data_processed_bits = context->total_data_processed_bytes * 8;
-    byte temp_buffer[sizeof(context->M)];
+    uint32_t total_data_processed_bits = context->total_data_processed_bytes * 8;
+    uint8_t temp_buffer[sizeof(context->M)];
 
     @<Append padding to the end of the message@>@;
     @<Append length...@>@;
@@ -89,18 +90,7 @@ void sha_256_final(sha_256_context* context)
 
 @*Type definitions, macros and constants.
 
-@ For SHA-256, the number of bits in a word, $w$, is 32. We will use the uint32
-datatype for almost all variables.
-
-@<Type definitions@>=
-typedef unsigned int uint32;
-
-@ A byte datatype is useful also.
-
-@<Type definitions@>=
-typedef unsigned char byte;
-
-@ The |rotr| macro is used for rotating a |uint32|, |X|, |N| bits to the right.
+@ The |rotr| macro is used for rotating a |uint32_t|, |X|, |N| bits to the right.
 
 @d rotr(X, N) ((X >> N) | (X << (32 - N)))
 
@@ -119,7 +109,7 @@ bits of the fractional parts of the cube roots of the first sixty four prime
 numbers$\ldots$''
 
 @<Global constants@>=
-static uint32 K[64] = {
+static uint32_t K[64] = {
 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
@@ -145,25 +135,25 @@ typedef struct
 @ The last hash value, $H^{(i-1)}$
 
 @<Context data@>=
-uint32 H[8];
+uint32_t H[8];
 
 @ The current block of the message, $M^{(i)}$, $m$ bits long. $m = 512$ for
 SHA-256.
 
 @<Context data@>=
-byte M[512 / 8]; /* Blocks are 512 bits long */
-uint32 current_block_length_bytes;
+uint8_t M[512 / 8]; /* Blocks are 512 bits long */
+uint32_t current_block_length_bytes;
 
 @ The total number of bytes in the message so far, $(l * 8)$, since $l$ is in
 bits.
  
 @<Context data@>=
-uint32 total_data_processed_bytes;
+uint32_t total_data_processed_bytes;
 
 @ The final digest value, $H^{(N)}$
 
 @<Context data@>=
-byte final_digest[32];
+uint8_t final_digest[32];
 
 @*Underlying functions. There are several primitive functions for SHA-256.
 
@@ -172,7 +162,7 @@ byte final_digest[32];
 $${\rm Ch}(x,y,z) = (x \land y) \oplus (\lnot x \land z)$$
 
 @<Underlying functions@>=
-uint32 Ch(uint32 x, uint32 y, uint32 z)
+uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
 {
     return (x & y) ^ (~x & z);
 }
@@ -182,7 +172,7 @@ uint32 Ch(uint32 x, uint32 y, uint32 z)
 $${\rm Maj}(x,y,z) = (x \land y) \oplus (x \land z) \oplus (y \land z)$$
 
 @<Underlying functions@>=
-uint32 Maj(uint32 x, uint32 y, uint32 z)
+uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
 {
     return (x & y) ^ (x & z) ^ (y & z);
 }
@@ -193,7 +183,7 @@ FIPS 180-2 \S4.1.2.
 $$\sigma_0^{\{256\}}(x) = (x \ggg 7) \oplus (x \ggg 18) \oplus (x \gg 3)$$
 
 @<Underlying functions@>=
-uint32 sigma0(uint32 x)
+uint32_t sigma0(uint32_t x)
 {
     return rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3);
 }
@@ -204,7 +194,7 @@ FIPS 180-2 \S4.1.2.
 $$\sigma_1^{\{256\}}(x) = (x \ggg 17) \oplus (x \ggg 19) \oplus (x \gg 10)$$
 
 @<Underlying functions@>=
-uint32 sigma1(uint32 x)
+uint32_t sigma1(uint32_t x)
 {
     return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
@@ -215,7 +205,7 @@ FIPS 180-2 \S4.1.2.
 $$\Sigma_0^{\{256\}}(x) = (x \ggg 2) \oplus (x \ggg 13) \oplus (x \ggg 22)$$
 
 @<Underlying functions@>=
-uint32 Sigma0(uint32 x)
+uint32_t Sigma0(uint32_t x)
 {
     return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
 }
@@ -226,7 +216,7 @@ FIPS 180-2 \S4.1.2.
 $$\Sigma_1^{\{256\}}(x) = (x \ggg 6) \oplus (x \ggg 11) \oplus (x \ggg 25)$$
 
 @<Underlying functions@>=
-uint32 Sigma1(uint32 x)
+uint32_t Sigma1(uint32_t x)
 {
     return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
 }
@@ -262,10 +252,10 @@ current message block, $M^{(i)}$.
 
 @<Compute the intermediate hash value, $H^{(i)}$@>=
 {
-    uint32 a, b, c, d, e, f, g, h;
-    uint32 t;
-    uint32 T1, T2;
-    uint32 W[64];
+    uint32_t a, b, c, d, e, f, g, h;
+    uint32_t t;
+    uint32_t T1, T2;
+    uint32_t W[64];
     
     @<Initialize working...@>@;
     
@@ -450,9 +440,9 @@ name for the output test name.
 @<Unit tests@>=
 void assert_byte_arrays_equal(
     const char* test_name,
-    const byte* expected_value,
+    const uint8_t* expected_value,
     int expected_value_length,
-    const byte* actual_value,
+    const uint8_t* actual_value,
     int actual_value_length)
 {
     printf("%s %s\n", ((expected_value_length != actual_value_length) ||
@@ -465,7 +455,7 @@ void assert_byte_arrays_equal(
 @<Unit tests@>=
 void test_B1()
 {
-    const byte expected_value[] = {
+    const uint8_t expected_value[] = {
         0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,
         0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,
         0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
@@ -474,7 +464,7 @@ void test_B1()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 3, (const byte*) "abc");
+    sha_256_update(&context, 3, (const uint8_t*) "abc");
     sha_256_final(&context);
     
     assert_final_digest_equal();
@@ -488,7 +478,7 @@ test_B1();
 @<Unit tests@>=
 void test_B2()
 {
-    const byte expected_value[] = {
+    const uint8_t expected_value[] = {
         0x24, 0x8d, 0x6a, 0x61, 0xd2, 0x06, 0x38, 0xb8,
         0xe5, 0xc0, 0x26, 0x93, 0x0c, 0x3e, 0x60, 0x39,
         0xa3, 0x3c, 0xe4, 0x59, 0x64, 0xff, 0x21, 0x67,
@@ -497,7 +487,7 @@ void test_B2()
     sha_256_context context;
     
     sha_256_init(&context);
-    sha_256_update(&context, 56, (const byte*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    sha_256_update(&context, 56, (const uint8_t*) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     sha_256_final(&context);
     
     assert_final_digest_equal();
@@ -512,14 +502,14 @@ test_B2();
 @<Unit tests@>=
 void test_B3()
 {
-    const byte expected_value[] = {
+    const uint8_t expected_value[] = {
         0xcd, 0xc7, 0x6e, 0x5c, 0x99, 0x14, 0xfb, 0x92,
         0x81, 0xa1, 0xc7, 0xe2, 0x84, 0xd7, 0x3e, 0x67,
         0xf1, 0x80, 0x9a, 0x48, 0xa4, 0x97, 0x20, 0x0e,
         0x04, 0x6d, 0x39, 0xcc, 0xc7, 0x11, 0x2c, 0xd0
         };
     sha_256_context context;
-    byte data_block[1000];
+    uint8_t data_block[1000];
     int counter = 0;
     
     memset(data_block, 'a', sizeof(data_block));

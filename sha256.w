@@ -45,7 +45,7 @@ the shell your taco salad comes in --- it's a bowl as well as a snack.
 @s uint8_t int
 @s uint32_t int
 
-@ In order to digest data with SHA-256, you simply call |sha_256_init| followed
+@*Usage. In order to digest data with SHA-256, you simply call |sha_256_init| followed
 by one or more calls to |sha_256_update| and then ultimately call
 |sha_256_final|. The resulting digest is stored in the byte array member
 |final_digest| of the |sha_256_context| structure.

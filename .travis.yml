@@ -6,3 +6,4 @@ addons:
     apt:
         packages:
             - texlive
+before_script: texhash

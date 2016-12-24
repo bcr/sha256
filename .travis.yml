@@ -1,3 +1,4 @@
+sudo: required
 language: c
 compiler:
     - clang
@@ -6,4 +7,4 @@ addons:
     apt:
         packages:
             - texlive
-before_script: texhash
+before_script: sudo texhash

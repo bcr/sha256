@@ -19,3 +19,7 @@ jobs:
           apk add build-base
           make
           make test
+    - uses: actions/upload-artifact@v2
+      with:
+        name: sha256.pdf
+        path: sha256.pdf

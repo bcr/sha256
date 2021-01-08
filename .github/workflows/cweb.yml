@@ -22,6 +22,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: sha256
-        path: |
-          sha256.pdf
-          sha256.c
+        path: sha256.pdf

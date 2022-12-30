@@ -23,7 +23,8 @@ under the terms of a permission notice identical to this one.
 
 \datethis
 @*Introduction. What follows is an implementation of the SHA-256 cryptographic
-message digest algorithm as defined in (still draft) FIPS PUB 180-2. It actually
+message digest algorithm as defined in \pdfURL{FIPS PUB 180-4}
+{https://csrc.nist.gov/publications/detail/fips/180/4/final}. It actually
 works, and I've put in the unit tests that came with the spec --- define the
 preprocessor symbol |UNIT_TEST| to enable them.
 
@@ -40,6 +41,12 @@ the shell your taco salad comes in --- it's a bowl as well as a snack.
 
 \smallskip\rightline{--- Blake Ramsdell, July 2002}
 \rightline{\pdfURL{Brute Squad Labs, Inc.}{http://www.brutesquadlabs.com}}
+
+\medskip{\bf December 2022 update} I have updated this slightly to refer to the
+current FIPS 180-4 specification and appropriate sections. For the test cases,
+I chose to refer to the original cases from FIPS 180-2 (a subset of these test
+cases were moved to a separate document that has a URL so long that I can't get
+CWEB to parse it.)
 
 @s sha_256_context int
 @s uint8_t int
@@ -103,7 +110,7 @@ current message block, $M^{(i)}$.
 
 @d remaining_bytes_in_block (sizeof(context->M) - context->current_block_length_bytes)
 
-@ The array |K| corresponds to the sequence $K^{\{256\}}$ defined in FIPS 180-2
+@ The array |K| corresponds to the sequence $K^{\{256\}}$ defined in FIPS 180-4
 \S4.2.2. According to that section, ``These words represent the first thirty-two
 bits of the fractional parts of the cube roots of the first sixty four prime
 numbers$\ldots$''
@@ -157,7 +164,7 @@ uint8_t final_digest[32];
 
 @*Underlying functions. There are several primitive functions for SHA-256.
 
-@ The function Ch as defined in FIPS 180-2 \S4.1.2.
+@ The function Ch as defined in FIPS 180-4 \S4.1.2.
 
 $${\rm Ch}(x,y,z) = (x \land y) \oplus (\lnot x \land z)$$
 
@@ -167,7 +174,7 @@ uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
     return (x & y) ^ (~x & z);
 }
 
-@ The function Maj as defined in FIPS 180-2 \S4.1.2.
+@ The function Maj as defined in FIPS 180-4 \S4.1.2.
 
 $${\rm Maj}(x,y,z) = (x \land y) \oplus (x \land z) \oplus (y \land z)$$
 
@@ -178,7 +185,7 @@ uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
 }
 
 @ The function |sigma0| corresponds to the function $\sigma_0^{\{256\}}$ in
-FIPS 180-2 \S4.1.2.
+FIPS 180-4 \S4.1.2.
 
 $$\sigma_0^{\{256\}}(x) = (x \ggg 7) \oplus (x \ggg 18) \oplus (x \gg 3)$$
 
@@ -189,7 +196,7 @@ uint32_t sigma0(uint32_t x)
 }
 
 @ The function |sigma1| corresponds to the function $\sigma_1^{\{256\}}$ in
-FIPS 180-2 \S4.1.2.
+FIPS 180-4 \S4.1.2.
 
 $$\sigma_1^{\{256\}}(x) = (x \ggg 17) \oplus (x \ggg 19) \oplus (x \gg 10)$$
 
@@ -200,7 +207,7 @@ uint32_t sigma1(uint32_t x)
 }
 
 @ The function |Sigma0| corresponds to the function $\Sigma_0^{\{256\}}$ in
-FIPS 180-2 \S4.1.2.
+FIPS 180-4 \S4.1.2.
 
 $$\Sigma_0^{\{256\}}(x) = (x \ggg 2) \oplus (x \ggg 13) \oplus (x \ggg 22)$$
 
@@ -211,7 +218,7 @@ uint32_t Sigma0(uint32_t x)
 }
 
 @ The function |Sigma1| corresponds to the function $\Sigma_1^{\{256\}}$ in
-FIPS 180-2 \S4.1.2.
+FIPS 180-4 \S4.1.2.
 
 $$\Sigma_1^{\{256\}}(x) = (x \ggg 6) \oplus (x \ggg 11) \oplus (x \ggg 25)$$
 
@@ -223,8 +230,8 @@ uint32_t Sigma1(uint32_t x)
 
 @*Preprocessing. Prepares the |sha_256_context| structure for first use. 
 
-@ The current hash value, $H$, is set to $H^{(0)}$ per the values in FIPS 180-2
-\S5.3.2. According to that section, ``These words were obtained by taking the
+@ The current hash value, $H$, is set to $H^{(0)}$ per the values in FIPS 180-4
+\S5.3.3. According to that section, ``These words were obtained by taking the
 first thirty-two bits of the fractional parts of the square roots of the first
 eight prime numbers.''
 
@@ -245,7 +252,7 @@ context->current_block_length_bytes = 0;
 context->total_data_processed_bytes = 0;
 
 @*Hash computation. The code in here is for implementing the methods of FIPS
-180-2 \S6.2 in order to compute the current hash value, $H^{(i)}$ for the
+180-4 \S6.2 in order to compute the current hash value, $H^{(i)}$ for the
 current message block, $M^{(i)}$.
 
 @ The general strategy is as follows
@@ -271,13 +278,9 @@ current message block, $M^{(i)}$.
     context->current_block_length_bytes = 0;
 }
 
-@ FIPS 180-2 \S6.2.2 specifies in step 2 the initialization of eight working
+@ FIPS 180-4 \S6.2.2 specifies in step 2 the initialization of eight working
 variables $a, b, \ldots, h$ to the current value of $H$ (which is the hash value
 for the previous block, and thus represents $H^{(i-1)}$.)
-
-I believe that there is an inconsistency in the specification since the prose
-reads ``Initialize$\ldots$with the $(i-1)$ hash value'' and the assignments that
-follow use components of $H^{(i)}$.
 
 @<Initialize working variables from $H^{(i-1)}$@>=
 a = context->H[0];
@@ -289,7 +292,7 @@ f = context->H[5];
 g = context->H[6];
 h = context->H[7];
 
-@ FIPS 180-2 \S6.2.2 specifies in step 1 to compute $W_t$.
+@ FIPS 180-4 \S6.2.2 specifies in step 1 to compute $W_t$.
  
 $$W_t\gets\left\{\matrix{
 M_t^{(i)} \hfill & 0 \leq t \leq 15\hfill\cr
@@ -315,7 +318,7 @@ else
         W[t-16];
 }
 
-@ The compression function, as specified in FIPS 180-2 \S6.2.2 step 3.
+@ The compression function, as specified in FIPS 180-4 \S6.2.2 step 3.
 
 @<Compression function@>=
 T1 = h + Sigma1(e) + Ch(e, f, g) + K[t] + W[t];
@@ -330,7 +333,7 @@ b = a;
 a = T1 + T2;
 
 @ Finally we assign the current intermediate hash value, $H^{(i)}$ to |H| in the
-context, per FIPS 180-2 \S6.2.2 step 3.
+context, per FIPS 180-4 \S6.2.2 step 4.
 
 @<Copy the intermediate hash value, $H^{(i)}$@>=
 context->H[0] += a;
@@ -362,7 +365,7 @@ if (remaining_bytes_in_block == 0)
 
 @* Final block processing. We need to jam a single 1 bit, followed by some
 number of 0 bits followed by 64 bits of the length (in bits) of the data that
-has been digested (from FIPS 180-2 \S5.1.1). Finally, we make a byte array copy
+has been digested (from FIPS 180-4 \S5.1.1). Finally, we make a byte array copy
 of the final digest value, $H^{(N)}$.
 
 @ The padding length is computed to leave enough space for the eight byte
@@ -497,7 +500,8 @@ void test_B2()
 test_B2();  
 
 @ FIPS 180-2 \S{}B.3, hashing the byte |'a'| 1,000,000 times (1,000 calls to
-|sha_256_update| with 1,000 |'a'|s apiece.)
+|sha_256_update| with 1,000 |'a'|s apiece.) This example was not preserved in
+FIPS 180-4 supporting documents.
 
 @<Unit tests@>=
 void test_B3()
